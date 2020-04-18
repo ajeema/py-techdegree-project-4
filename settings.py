@@ -2,7 +2,7 @@ from playhouse.sqlite_ext import *
 # Database file/configuration
 
 DATABASE = 'inventory.db'
-db = SqliteExtDatabase(DATABASE, pragmas={'journal_mode': 'wal'})
+db = SqliteDatabase(DATABASE, pragmas={'journal_mode': 'wal'})
 
 # source product file
 SOURCE = 'inventory.csv'
