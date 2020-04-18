@@ -73,34 +73,37 @@ def view_every_product():
 	"""Display all products"""
 	pass
 
+
 def add_product():
 	"""add a product"""
 	pass
+
 
 def search_product():
 	"""Search for a product (i.e 1)"""
 	pass
 
+
 def menu_loop():
-    """show the menu"""
-    choice = None
+	"""show the menu"""
+	choice = None
 
-    while choice != 'q':
-        print("Enter 'q' to quit.")
-        for key, value in menu.items():
-            print('{}) {}'.format(key, value.__doc__))
-        choice = input('Action: ').lower().strip()
+	while choice != 'q':
+		print("Enter 'q' to quit.")
+		for key, value in menu.items():
+			print('{}) {}'.format(key, value.__doc__))
+		choice = input('Action: ').lower().strip()
 
-        if choice in menu:
-            menu[choice]()
+		if choice in menu:
+			menu[choice]()
+
 
 menu = OrderedDict([
-    ('a', add_product),
-	('b', backup),
-	('e', view_every_product),
-	('v', search_product),
+		('a', add_product),
+		('b', backup),
+		('e', view_every_product),
+		('v', search_product),
 ])
-
 
 if __name__ == '__main__':
 	loading()
@@ -109,4 +112,4 @@ if __name__ == '__main__':
 	initialize()
 	open_csv()
 	menu_loop()
-	#backup()
+# backup()
