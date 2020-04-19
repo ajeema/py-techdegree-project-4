@@ -123,3 +123,4 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+env/lib/python3.7/site-packages/six-1.14.0.dist-info/WHEEL

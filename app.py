@@ -3,67 +3,88 @@ import csv
 from datetime import datetime
 from collections import OrderedDict
 
+import openpyxl
 import pandas as pd
 from peewee import *
 
 from settings import *
 from welcome import *
 
-
-def open_csv():
-	products = []
-	with open('inventory.csv') as csvfile:
-		reader = csv.DictReader(csvfile)
-		rows = list(reader)
-		for row in rows:
-			products.append({
-					'product_name': row['product_name'],
-					'product_price': (row['product_price'].strip('$')).replace('.', ''),
-					'product_quantity': int(row['product_quantity']),
-					'date_updated': datetime.strptime(row['date_updated'], '%m/%d/%Y'),
-			})
-		if len(Product.select()) == 0:
-			for product in products:
-				Product.create(**product)
-	return products
-
+db = SqliteDatabase('inventory.db')
 
 class Product(Model):
-	product_id = AutoField()
-	date_updated = DateTimeField()
-	product_name = TextField()
-	product_quantity = IntegerField()
-	product_price = IntegerField()
+    product_id = AutoField()
+    date_updated = DateTimeField()
+    product_name = TextField()
+    product_quantity = IntegerField()
+    product_price = IntegerField()
 
-	class Meta:
-		database = db
+    class Meta:
+        database = db
 
-
-# Database initialization and closing
 def initialize():
-	"""create table and db"""
-	db.connect()
-	db.create_tables([Product], safe = True)
+    """create table and db"""
+    db.connect()
+    # print("Just connected to DB")
+    db.create_tables([Product], safe=True)
+    # print("just created tables")
 
 
-def close_db():
-	"""close database connection"""
-	db.close()
+def open_and_clean_csv():
+    with open('inventory.csv', newline='') as csvfile:
+        artreader = csv.DictReader(csvfile, delimiter=',')
+        rows = list(artreader)
+        for row in rows[:]:
 
+            row['product_quantity'] = int(row['product_quantity'])
+            row['product_price'] = (row['product_price'].strip('$')).replace('.', '')
+            row['product_price'] = int(row['product_price'])
+            row['date_updated'] = datetime.strptime(row['date_updated'], '%m/%d/%Y')
+
+            if Product.select().where(Product.product_name.contains(row['product_name'])):
+                for product in Product.select().where(Product.product_name.contains(row['product_name'])):
+                    if product.date_updated < row['date_updated']:
+                        product.date_updated = row['date_updated']
+                        product.product_quantity = row['product_quantity']
+                        product.product_price = row['product_price']
+                        product.save()
+                    #else:
+
+            else:
+                Product.create(product_name=row['product_name'],
+                               date_updated=row['date_updated'],
+                               product_quantity=row['product_quantity'],
+                               product_price=row['product_price'])
 
 def backup():
 	"""backup db"""
-	df = pd.read_sql_query("SELECT * FROM Product;", db)
+	df = pd.read_sql("SELECT * FROM Product;", db)
 	print("Which format would you like to export to?")
 	print("""
 [1] .json
 [2] .csv
+[3] .xlsx
+[4] all formats
 	""")
 	export_type = input("___:")
 	if export_type == '1':
-		df.to_json('backups/backup.json', index = True)
+		BACKUP_DB
+		print("Backup saved")
 	elif export_type == '2':
-		df.to_csv('backups/backup.csv', index = True)
+		BACKUP_CSV
+		print("Backup saved")
+	elif export_type == '3':
+		writer = pd.ExcelWriter('backups/backup.xlsx')
+		df.to_excel(writer, 'DataFrame')
+		writer.save()
+		print("Backups saved")
+	# elif export_type == '4':
+	# 	BACKUP_ALL
+	# 	writer = pd.ExcelWriter('backups/backup.xlsx', index=False)
+	# 	df.to_excel(writer, 'DataFrame')
+	# 	writer.save()
+	# 	print("Backups saved")
+
 	else:
 		print("You didn't enter a valid option")
 	pass
@@ -71,7 +92,9 @@ def backup():
 
 def view_every_product():
 	"""Display all products"""
-	pass
+	df = pd.read_sql("SELECT * FROM Product;", db)
+
+	print(df.columns())
 
 
 def add_product():
@@ -110,6 +133,7 @@ if __name__ == '__main__':
 	os.system('cls' if os.name == 'nt' else 'clear')
 	welcome()
 	initialize()
-	open_csv()
+	open_and_clean_csv()
 	menu_loop()
+
 # backup()
