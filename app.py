@@ -23,17 +23,14 @@ class Product(Model):
         database = db
 
 def initialize():
-    """create table and db"""
     db.connect()
-    # print("Just connected to DB")
     db.create_tables([Product], safe=True)
-    # print("just created tables")
 
 
 def open_and_clean_csv():
     with open('inventory.csv', newline='') as csvfile:
-        artreader = csv.DictReader(csvfile, delimiter=',')
-        rows = list(artreader)
+        inv_reader = csv.DictReader(csvfile, delimiter=',')
+        rows = list(inv_reader)
         for row in rows[:]:
 
             row['product_quantity'] = int(row['product_quantity'])
@@ -48,13 +45,11 @@ def open_and_clean_csv():
                         product.product_quantity = row['product_quantity']
                         product.product_price = row['product_price']
                         product.save()
-                    #else:
-
             else:
                 Product.create(product_name=row['product_name'],
-                               date_updated=row['date_updated'],
+                               product_price=row['product_price'],
                                product_quantity=row['product_quantity'],
-                               product_price=row['product_price'])
+                               date_updated=row['date_updated'])
 
 def backup():
 	"""backup db"""
@@ -68,16 +63,16 @@ def backup():
 	""")
 	export_type = input("___:")
 	if export_type == '1':
-		BACKUP_DB
+		BACKUP_JSON
 		print("Backup saved")
 	elif export_type == '2':
 		BACKUP_CSV
 		print("Backup saved")
-	elif export_type == '3':
-		writer = pd.ExcelWriter('backups/backup.xlsx')
-		df.to_excel(writer, 'DataFrame')
-		writer.save()
-		print("Backups saved")
+	# elif export_type == '3':
+	# 	writer = pd.ExcelWriter('backups/backup.xlsx')
+	# 	df.to_excel(writer, 'DataFrame')
+	# 	writer.save()
+	# 	print("Backups saved")
 	# elif export_type == '4':
 	# 	BACKUP_ALL
 	# 	writer = pd.ExcelWriter('backups/backup.xlsx', index=False)
@@ -89,22 +84,54 @@ def backup():
 		print("You didn't enter a valid option")
 	pass
 
-
 def view_every_product():
 	"""Display all products"""
-	df = pd.read_sql("SELECT * FROM Product;", db)
+	# df = pd.read_sql("SELECT * FROM Product;", db)
+	# id_num = input("search by id number: ")
+	# results = df.loc[df['product_id'] == id_num]
+	# print(results, index=False)
+	choice = int(input("Pick a number"))
+	result = df.iloc[choice]
 
-	print(df.columns())
+	print(result)
+
+
+
+	#print(cols(index=False))
 
 
 def add_product():
 	"""add a product"""
-	pass
+	table = pd.read_sql("SELECT * FROM Product;", db)
+	input_name = str(input("Enter a name: "))
+	input_qty = int(input("enter a quantity"))
+	input_price = input("Enter a price")
+	add_product = table.insert(product_name=input_name,
+	             product_quantity=input_qty,
+	             product_price=input_price,
+	             date_updated=datetime.now())
+	print(f"Product added with product id of {add_product}")
 
 
 def search_product():
 	"""Search for a product (i.e 1)"""
-	pass
+	total_rows = Product.select().count()
+	try:
+		product_id = int(input(f'Input product id (hint: between 1 and {total_rows}:) '))
+		# http://docs.peewee-orm.com/en/latest/peewee/api.html#Model.get_by_id
+		product = Product.get_by_id(product_id)
+		print("""
+    Your search result is:
+		""")
+		print(f'NAME --------------|{product.product_name}')
+		print('PRICE -------------|${}'.format(product.product_price / 100))
+		print(f'QTY ---------------|{product.product_quantity}')
+		print(f'DATE UPDATED ------|{product.date_updated}')
+	except ValueError:
+		print(f'Please enter a number value from 1 to {total_rows}')
+	except Product.DoesNotExist:
+		print("The product does not exist")
+
 
 
 def menu_loop():
@@ -125,7 +152,7 @@ menu = OrderedDict([
 		('a', add_product),
 		('b', backup),
 		('e', view_every_product),
-		('v', search_product),
+		('v', search_product)
 ])
 
 if __name__ == '__main__':
