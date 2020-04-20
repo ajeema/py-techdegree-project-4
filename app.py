@@ -14,7 +14,7 @@ db = SqliteDatabase('inventory.db')
 
 class Product(Model):
     product_id = AutoField()
-    date_updated = DateTimeField()
+    date_updated = DateTimeField(default=datetime.now)
     product_name = TextField()
     product_quantity = IntegerField()
     product_price = IntegerField()
@@ -63,55 +63,40 @@ def backup():
 	""")
 	export_type = input("___:")
 	if export_type == '1':
-		BACKUP_JSON
+		df.to_json('backups/backup.json', orient='records', lines=True)
 		print("Backup saved")
 	elif export_type == '2':
-		BACKUP_CSV
+		df.to_csv('backups/backup.csv', sep='\t', index=False)
 		print("Backup saved")
-	# elif export_type == '3':
-	# 	writer = pd.ExcelWriter('backups/backup.xlsx')
-	# 	df.to_excel(writer, 'DataFrame')
-	# 	writer.save()
-	# 	print("Backups saved")
-	# elif export_type == '4':
-	# 	BACKUP_ALL
-	# 	writer = pd.ExcelWriter('backups/backup.xlsx', index=False)
-	# 	df.to_excel(writer, 'DataFrame')
-	# 	writer.save()
-	# 	print("Backups saved")
-
+	elif export_type == '3':
+		writer = pd.ExcelWriter('backups/backup.xlsx')
+		df.to_excel(writer, 'DataFrame')
+		writer.save()
+		print("Backups saved")
 	else:
 		print("You didn't enter a valid option")
-	pass
+
 
 def view_every_product():
 	"""Display all products"""
-	# df = pd.read_sql("SELECT * FROM Product;", db)
-	# id_num = input("search by id number: ")
-	# results = df.loc[df['product_id'] == id_num]
-	# print(results, index=False)
 	choice = int(input("Pick a number"))
 	result = df.iloc[choice]
 
 	print(result)
 
-
-
-	#print(cols(index=False))
-
-
 def add_product():
 	"""add a product"""
-	table = pd.read_sql("SELECT * FROM Product;", db)
 	input_name = str(input("Enter a name: "))
 	input_qty = int(input("enter a quantity"))
 	input_price = input("Enter a price")
-	add_product = table.insert(product_name=input_name,
-	             product_quantity=input_qty,
-	             product_price=input_price,
-	             date_updated=datetime.now())
-	print(f"Product added with product id of {add_product}")
+	new_date = DateTimeField(default=datetime.now())
+	data_source = [
+			{'product_name': input_name, 'product_price': input_price},
+			{'product_quantity': input_qty, 'date_updated': new_date}
+	]
 
+	for data_dict in data_source:
+		Product.create(**data_dict)
 
 def search_product():
 	"""Search for a product (i.e 1)"""
