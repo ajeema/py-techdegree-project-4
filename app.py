@@ -9,9 +9,12 @@ from peewee import *
 from settings import *
 from welcome import *
 
+# Tried to add this in to settings file but caused connection issues.
+# TODO figure out how to add to settings file.
 db = SqliteDatabase(DATABASE)
 
 class Product(Model):
+    """Base class"""
     product_id = AutoField()
     product_name = TextField()
     product_price = IntegerField()
@@ -22,11 +25,13 @@ class Product(Model):
         database = db
 
 def initialize():
+    """connect to db and create table"""
     db.connect()
     db.create_tables([Product], safe=True)
 
 
 def open_and_clean_csv():
+    """Read the input .csv file and clean the data"""
     with open(SOURCE, newline='') as csvfile:
         inv_reader = csv.DictReader(csvfile, delimiter=',')
         rows = list(inv_reader)
@@ -35,30 +40,20 @@ def open_and_clean_csv():
             row['product_quantity'] = int(row['product_quantity'])
             row['product_price'] = (row['product_price'].strip('$')).replace('.', '')
             row['product_price'] = int(row['product_price'])
-            row['date_updated'] = datetime.strptime(row['date_updated'], '%m/%d/%Y')
-
-            if Product.select().where(Product.product_name.contains(row['product_name'])):
-                for product in Product.select().where(Product.product_name.contains(row['product_name'])):
-                    if product.date_updated < row['date_updated']:
-                        product.date_updated = row['date_updated']
-                        product.product_quantity = row['product_quantity']
-                        product.product_price = row['product_price']
-                        product.save()
-            else:
-                Product.create(product_name=row['product_name'],
+            row['date_updated'] = datetime.strptime(row['date_updated'], "%m/%d/%Y")
+            Product.get_or_create(product_name=row['product_name'],
                                product_price=row['product_price'],
                                product_quantity=row['product_quantity'],
                                date_updated=row['date_updated'])
 
 
 def backup():
-    """backup db"""
+    """Backup database"""
+    df = pd.read_sql("SELECT * FROM Product;", db)
     print("Which format would you like to export to?")
-    print("""
-[1] .json
-[2] .csv
-[3] .xlsx
-    """)
+    print("[1] .json | [2] .csv | [3] .xlsx")
+
+    # Output format based on their selection.
     export_type = input("___:")
     if export_type == '1':
         df.to_json('backups/backup.json', orient='records', lines=True)
@@ -77,30 +72,31 @@ def backup():
 
 def view_every_product():
     """Display all products"""
-    view_all = Product.select()
 
+    # TODO MAKE WORK
+    view_all = Product.select()
     print(view_all)
 
+
 def add_product():
-    """add a product"""
+    """Add a new product"""
+
     input_name = str(input("Enter a name: "))
     input_qty = int(input("enter a quantity"))
     input_price = input("Enter a price")
     fields = [Product.product_name, Product.product_price, Product.product_quantity, Product.date_updated]
-    data = [(input_name, input_price, input_qty, datetime.today()
-                    )]
-
+    data = [(input_name, input_price, input_qty, now.strftime("%m/%d/%Y, %H:%M:%S"))]
     Product.insert_many(data, fields=fields).execute()
 
 
 def search_product():
     """Search for a product (i.e 1)"""
-    clear()
+
     total_rows = Product.select().count()
     try:
         product_id = int(input(f'Input product id (hint: between 1 and {total_rows}:) '))
-        # http://docs.peewee-orm.com/en/latest/peewee/api.html#Model.get_by_id
         product = Product.get_by_id(product_id)
+
         print("""
     Your search result is:
         """)
@@ -112,16 +108,13 @@ def search_product():
         print(f'Please enter a number value from 1 to {total_rows}')
     except Product.DoesNotExist:
         print(f"""The product does not exist.
-{product_id} is not within 1 to {total_rows}
-""")
-        clear()
-
+{product_id} is not within 1 to {total_rows}""")
 
 
 def menu_loop():
     """show the menu"""
-    choice = None
 
+    choice = None
     while choice != 'q':
         print("Enter 'q' to quit.")
         for key, value in menu.items():

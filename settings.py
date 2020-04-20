@@ -1,17 +1,23 @@
 import os
+from datetime import datetime
 
 from playhouse.sqlite_ext import *
 import pandas as pd
+
+
+
+now = datetime.now()
 
 # Database file/configuration
 DATABASE = 'inventory.db'
 db = SqliteDatabase(DATABASE)
 
-#Pandas dataframe
-df = pd.read_sql("SELECT * FROM Product;", db)
-
 # source product file
 SOURCE = 'inventory.csv'
+
+#Pandas dataframe
+
+
 
 
 def clear():
