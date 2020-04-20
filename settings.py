@@ -15,10 +15,6 @@ db = SqliteDatabase(DATABASE)
 # source product file
 SOURCE = 'inventory.csv'
 
-#Pandas dataframe
-
-
-
 
 def clear():
 	"""Clear the screen"""

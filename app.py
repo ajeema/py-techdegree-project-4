@@ -76,7 +76,7 @@ def backup():
 def view_every_product():
     """Display all products"""
 
-    # TODO MAKE WORK
+    # TODO MAKE WORK PROPERLY
     df = pd.read_sql("SELECT * FROM Product;", db)
     print(df)
 
@@ -86,10 +86,18 @@ def add_product():
 
     input_name = str(input("Enter a name: "))
     input_qty = int(input("enter a quantity"))
-    input_price = input("Enter a price")
+    input_price = int(input("Enter a price (In pennies i.e - $4.00 = 400)"))
     fields = [Product.product_name, Product.product_price, Product.product_quantity, Product.date_updated]
     data = [(input_name, input_price, input_qty, now.strftime("%m/%d/%Y, %H:%M:%S"))]
-    Product.insert_many(data, fields=fields).execute()
+    checkit = Product.get_or_none(product_name = input_name)
+
+    # Work in progress
+    if checkit is not None:
+        if Product.date_updated < datetime.now():
+            print("Sorry, this product exists. But let's update the values")
+
+    else:
+        Product.insert_many(data, fields=fields).execute()
 
 
 def search_product():
