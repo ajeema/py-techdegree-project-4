@@ -51,7 +51,7 @@ def backup():
     """Backup database"""
     df = pd.read_sql("SELECT * FROM Product;", db)
     print("Which format would you like to export to?")
-    print("[1] .json | [2] .csv | [3] .xlsx")
+    print("[1] .json | [2] .csv | [3] .xlsx | [4] .html")
 
     # Output format based on their selection.
     export_type = input("___:")
@@ -66,6 +66,9 @@ def backup():
         df.to_excel(writer, 'DataFrame', index=False)
         writer.save()
         print(".xlsx Backup saved")
+    elif export_type == '4':
+        df.to_html('backups/backup.html', index=False)
+        print(".html Backup saved")
     else:
         print("You didn't enter a valid option")
 
@@ -74,8 +77,8 @@ def view_every_product():
     """Display all products"""
 
     # TODO MAKE WORK
-    view_all = Product.select()
-    print(view_all)
+    df = pd.read_sql("SELECT * FROM Product;", db)
+    print(df)
 
 
 def add_product():
