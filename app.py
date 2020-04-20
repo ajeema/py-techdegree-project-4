@@ -9,6 +9,7 @@ from peewee import *
 from settings import *
 from welcome import *
 
+
 # Tried to add this in to settings file but caused connection issues.
 # TODO figure out how to add to settings file.
 db = SqliteDatabase(DATABASE)
@@ -32,6 +33,7 @@ def initialize():
 
 def open_and_clean_csv():
     """Read the input .csv file and clean the data"""
+
     with open(SOURCE, newline='') as csvfile:
         inv_reader = csv.DictReader(csvfile, delimiter=',')
         rows = list(inv_reader)
@@ -41,6 +43,7 @@ def open_and_clean_csv():
             row['product_price'] = (row['product_price'].strip('$')).replace('.', '')
             row['product_price'] = int(row['product_price'])
             row['date_updated'] = datetime.strptime(row['date_updated'], "%m/%d/%Y")
+
             Product.get_or_create(product_name=row['product_name'],
                                product_price=row['product_price'],
                                product_quantity=row['product_quantity'],
