@@ -15,7 +15,7 @@ class Product(Model):
     product_name = TextField(unique =True)
     product_price = IntegerField()
     product_quantity = IntegerField(default=0)
-    date_updated = DateTimeField(default=datetime.now)
+    date_updated = DateField(default =now)
 
     class Meta:
         database = db
@@ -38,7 +38,7 @@ def open_and_clean_csv():
             row['product_quantity'] = int(row['product_quantity'])
             row['product_price'] = (row['product_price'].strip('$')).replace('.', '')
             row['product_price'] = int(row['product_price'])
-            row['date_updated'] = datetime.strptime(row['date_updated'], "%m/%d/%Y")
+            row['date_updated'] = datetime.strptime(row['date_updated'], "%m/%d/%Y").date()
 
             if Product.select().where\
                             (Product.product_name.contains(row['product_name'])):
@@ -49,8 +49,6 @@ def open_and_clean_csv():
                         product.product_quantity = row['product_quantity']
                         product.product_price = row['product_price']
                         product.save()
-                    else:
-                        pass
 
             else:
                 Product.get_or_create(product_name=row['product_name'],
@@ -161,10 +159,21 @@ def menu_loop():
         print("Enter 'q' to quit.")
         for key, value in menu.items():
             print('{}) {}'.format(key, value.__doc__))
-        choice = input('Action: ').lower().strip()
+        choice = input('Enter your choice: ').lower().strip()
 
         if choice in menu:
+            clear()
             menu[choice]()
+        elif choice =='q':
+            print("Thanks for the free labour!")
+        else:
+            clear()
+            print("""
+### Sorry you didn't enter ###
+###   a valid menu option  ###
+###    Please try again!!  ###
+       """)
+
 
 
 menu = OrderedDict([
