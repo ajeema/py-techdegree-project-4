@@ -1,7 +1,7 @@
 
 import csv
 from datetime import datetime
-from collections import OrderedDict
+from collections import Counter, defaultdict, OrderedDict
 
 import pandas as pd
 from peewee import *
@@ -17,7 +17,7 @@ db = SqliteDatabase(DATABASE)
 class Product(Model):
     """Base class"""
     product_id = AutoField()
-    product_name = TextField()
+    product_name = TextField(unique =True)
     product_price = IntegerField()
     product_quantity = IntegerField(default=0)
     date_updated = DateTimeField(default=datetime.now)
@@ -29,7 +29,6 @@ def initialize():
     """connect to db and create table"""
     db.connect()
     db.create_tables([Product], safe=True)
-
 
 def open_and_clean_csv():
     """Read the input .csv file and clean the data"""
@@ -44,7 +43,20 @@ def open_and_clean_csv():
             row['product_price'] = int(row['product_price'])
             row['date_updated'] = datetime.strptime(row['date_updated'], "%m/%d/%Y")
 
-            Product.get_or_create(product_name=row['product_name'],
+            if Product.select().where\
+                            (Product.product_name.contains(row['product_name'])):
+                for product in Product.select().where\
+                                (Product.product_name.contains(row['product_name'])):
+                    if product.date_updated < row['date_updated']:
+                        product.date_updated = row['date_updated']
+                        product.product_quantity = row['product_quantity']
+                        product.product_price = row['product_price']
+                        product.save()
+                    else:
+                        pass
+
+            else:
+                Product.get_or_create(product_name=row['product_name'],
                                product_price=row['product_price'],
                                product_quantity=row['product_quantity'],
                                date_updated=row['date_updated'])
@@ -88,9 +100,13 @@ def view_every_product():
 def add_product():
     """Add a new product"""
 
-    input_name = str(input("Enter a name: "))
+    while True:
+        input_name = str(input("Enter a name: "))
+        if input_name != '':
+            break
     input_qty = int(input("enter a quantity"))
     input_price = int(input("Enter a price (In pennies i.e - $4.00 = 400)"))
+    #ValueError:
     fields = [Product.product_name, Product.product_price, Product.product_quantity, Product.date_updated]
     data = [(input_name, input_price, input_qty, now.strftime("%m/%d/%Y, %H:%M:%S"))]
     checkit = Product.get_or_none(product_name = input_name)
