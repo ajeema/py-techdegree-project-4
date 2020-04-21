@@ -2,9 +2,6 @@ import os
 from datetime import datetime
 
 from playhouse.sqlite_ext import *
-import pandas as pd
-
-
 
 now = datetime.now()
 
@@ -19,15 +16,3 @@ SOURCE = 'inventory.csv'
 def clear():
 	"""Clear the screen"""
 	os.system('cls' if os.name == 'nt' else 'clear')
-
-
-
-
-
-
-
-
-
-
-
-

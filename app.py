@@ -1,7 +1,6 @@
-
 import csv
 from datetime import datetime
-from collections import Counter, defaultdict, OrderedDict
+from collections import OrderedDict
 
 import pandas as pd
 from peewee import *
@@ -9,10 +8,6 @@ from peewee import *
 from settings import *
 from welcome import *
 
-
-# Tried to add this in to settings file but caused connection issues.
-# TODO figure out how to add to settings file.
-db = SqliteDatabase(DATABASE)
 
 class Product(Model):
     """Base class"""
@@ -25,10 +20,12 @@ class Product(Model):
     class Meta:
         database = db
 
+
 def initialize():
     """connect to db and create table"""
     db.connect()
     db.create_tables([Product], safe=True)
+
 
 def open_and_clean_csv():
     """Read the input .csv file and clean the data"""
@@ -97,7 +94,6 @@ def view_every_product():
     print(df.to_string(index=False))
 
 
-
 def add_product():
     """Add a new product"""
     while True:
@@ -108,14 +104,16 @@ def add_product():
             break
     while True:
         try:
-            input_qty = int(input("enter a quantity"))
-        except ValueError: print("Please enter a number")
+            input_qty = int(input("enter a quantity: "))
+        except ValueError:
+            print("Please enter a number")
         else:
             break
     while True:
         try:
-            input_price = int(input("Enter a price (In pennies i.e - $4.00 = 400)"))
-        except ValueError: print("Please enter a number")
+            input_price = int(input("Enter a price (In pennies i.e - $4.00 = 400: )"))
+        except ValueError:
+            print("Please enter a number")
         else:
             break
 
@@ -146,7 +144,7 @@ def search_product():
     Your search result is:
         """)
         print(f'NAME --------------|{product.product_name}')
-        print('PRICE -------------|${}'.format(product.product_price / 100))
+        print(f'PRICE -------------|${(product.product_price / 100)}')
         print(f'QTY ---------------|{product.product_quantity}')
         print(f'DATE UPDATED ------|{product.date_updated}')
     except ValueError:
