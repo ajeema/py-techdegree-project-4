@@ -79,13 +79,10 @@ def backup():
 def view_every_product():
     """Display all products"""
 
-    # TODO MAKE WORK PROPERLY
+    # TODO CLEAN UP DISPLAY
     df = pd.read_sql("SELECT * FROM Product;", db)
+    print(df.to_string(index=False))
 
-    pd.set_option('display.max_colwidth', None)
-    print(df[['product_name',
-              'product_price',
-              'product_quantity',]])
 
 
 def add_product():
