@@ -19,8 +19,8 @@ class Product(Model):
     product_id = AutoField()
     product_name = TextField()
     product_price = IntegerField()
-    product_quantity = IntegerField()
-    date_updated = DateTimeField()
+    product_quantity = IntegerField(default=0)
+    date_updated = DateTimeField(default=datetime.now)
 
     class Meta:
         database = db
@@ -96,9 +96,11 @@ def add_product():
 
     # Work in progress
     if checkit is not None:
-        if Product.date_updated < datetime.now():
-            print("Sorry, this product exists. But let's update the values")
-
+        print("Sorry, this product exists. But let's update the values")
+        Product.update(
+                product_quantity = input_qty,
+                product_price = input_price
+        ).where(Product.product_name == input_name).execute()
     else:
         Product.insert_many(data, fields=fields).execute()
 
