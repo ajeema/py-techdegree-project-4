@@ -32,6 +32,7 @@ def initialize():
 
 def open_and_clean_csv():
     """Read the input .csv file and clean the data"""
+#TODO Rewrite this!
 
     with open(SOURCE, newline='') as csvfile:
         inv_reader = csv.DictReader(csvfile, delimiter=',')
@@ -99,14 +100,25 @@ def view_every_product():
 
 def add_product():
     """Add a new product"""
-
     while True:
         input_name = str(input("Enter a name: "))
-        if input_name != '':
+        if input_name == '':
+                print("Field can't be empty")
+        elif input_name != '':
             break
-    input_qty = int(input("enter a quantity"))
-    input_price = int(input("Enter a price (In pennies i.e - $4.00 = 400)"))
-    #ValueError:
+    while True:
+        try:
+            input_qty = int(input("enter a quantity"))
+        except ValueError: print("Please enter a number")
+        else:
+            break
+    while True:
+        try:
+            input_price = int(input("Enter a price (In pennies i.e - $4.00 = 400)"))
+        except ValueError: print("Please enter a number")
+        else:
+            break
+
     fields = [Product.product_name, Product.product_price, Product.product_quantity, Product.date_updated]
     data = [(input_name, input_price, input_qty, now.strftime("%m/%d/%Y, %H:%M:%S"))]
     checkit = Product.get_or_none(product_name = input_name)
