@@ -81,7 +81,11 @@ def view_every_product():
 
     # TODO MAKE WORK PROPERLY
     df = pd.read_sql("SELECT * FROM Product;", db)
-    print(df)
+
+    pd.set_option('display.max_colwidth', None)
+    print(df[['product_name',
+              'product_price',
+              'product_quantity',]])
 
 
 def add_product():
