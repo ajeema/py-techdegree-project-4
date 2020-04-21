@@ -29,7 +29,6 @@ def initialize():
 
 def open_and_clean_csv():
     """Read the input .csv file and clean the data"""
-#TODO Rewrite this!
 
     with open(SOURCE, newline='') as csvfile:
         inv_reader = csv.DictReader(csvfile, delimiter=',')
