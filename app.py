@@ -69,7 +69,7 @@ def backup():
         df.to_json('backups/backup.json', orient='records', lines=True)
         print(".json Backup saved")
     elif export_type == '2':
-        df.to_csv('backups/backup.csv', sep='\t', index=False)
+        df.to_csv('backups/backup.csv', sep=',', index=False)
         print(".csv Backup saved")
     elif export_type == '3':
         writer = pd.ExcelWriter('backups/backup.xlsx')
