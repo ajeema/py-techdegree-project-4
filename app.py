@@ -115,6 +115,10 @@ def add_product():
             break
 
     fields = [Product.product_name, Product.product_price, Product.product_quantity, Product.date_updated]
+
+    # Using DateTimeField instead of DateTime to covercome the potential conflict
+    # If a user backups up multiple times in one day. This ensures the code understands
+    # which is the newest.
     data = [(input_name, input_price, input_qty, now.strftime("%m/%d/%Y, %H:%M:%S"))]
     checkit = Product.get_or_none(product_name = input_name)
 
