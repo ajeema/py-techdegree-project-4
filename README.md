@@ -4,12 +4,12 @@ This smal utility too is a simple example of reading CSV File I/O, cleanding dat
 
 to run this application create a local virtual environment.
 
->> cd to project folder
->> python3 -m venv ./env
->>> source ./env/bin/activate
->> pip3 install -r requirements.txtx
->> python3 app.py
+cd to project folder
+python3 -m venv ./env
+source ./env/bin/activate
+pip3 install -r requirements.txtx
+python3 app.py
 
 to deactivate simply type:
 
->> deactivate
+deactivate
